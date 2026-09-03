@@ -390,4 +390,340 @@ kubectl describe pvc claim01
 
 ---
 
-# N
+# N. Job Commands
+
+## Create Job
+
+```bash
+kubectl create job test-job \
+--image=busybox
+```
+
+## Get Jobs
+
+```bash
+kubectl get jobs
+```
+
+## Delete Job
+
+```bash
+kubectl delete job test-job
+```
+
+---
+
+# O. CronJob Commands
+
+## List CronJobs
+
+```bash
+kubectl get cronjobs
+```
+
+## Create CronJob
+
+```bash
+kubectl create cronjob backup \
+--schedule="*/5 * * * *" \
+--image=busybox
+```
+
+---
+
+# P. Apply & Manifest Commands
+
+## Apply YAML
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+## Create Resources
+
+```bash
+kubectl create -f deployment.yaml
+```
+
+## Delete Resources
+
+```bash
+kubectl delete -f deployment.yaml
+```
+
+## Dry Run
+
+```bash
+kubectl apply -f deployment.yaml --dry-run=client
+```
+
+---
+
+# Q. Resource Monitoring
+
+## Pod Resource Usage
+
+```bash
+kubectl top pods
+```
+
+## Node Resource Usage
+
+```bash
+kubectl top nodes
+```
+
+---
+
+# R. Events
+
+## Cluster Events
+
+```bash
+kubectl get events
+```
+
+## Sort Events
+
+```bash
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+---
+
+# S. Label Commands
+
+## Add Label
+
+```bash
+kubectl label pod nginx app=web
+```
+
+## Remove Label
+
+```bash
+kubectl label pod n*inx app-
+```
+
+## Filter by Label
+
+*``bash
+kubectl get pods -l app=web*```
+
+---
+
+# T. Taints & Toleration*
+
+## Add Taint
+
+```bash
+kubectl ta*nt nodes worker01 key=value:NoSche*ule
+```
+
+## Remove Taint
+
+```bash
+*ubectl taint nodes worker01 key=va*ue:NoSchedule-
+```
+
+---
+
+# U. Anno*ate Resources
+
+## Add Annotation
+
+*``bash
+kubectl annotate pod nginx *wner=devops
+```
+
+## Remove Annotat*on
+
+```bash
+kubectl annotate pod n*inx owner-
+```
+
+---
+
+# V. Debugging Commands
+
+## Describe Resource
+
+```bash
+kubectl describe pod nginx
+```
+
+## Container Logs
+
+```bash
+kubectl logs nginx
+```
+
+## Previous Container Logs
+
+```bash
+kubectl logs nginx --previous
+```
+
+## Debug Container
+
+```bash
+kubectl debug -it nginx --image=busybox
+```
+
+---
+
+# W. Networking Commands
+
+## Port Forward
+
+```bash
+kubectl port-forward pod/nginx 8080:80
+```
+
+## DNS Check
+
+```bash
+kubectl exec -it nginx -- nslookup kubernetes.default
+```
+
+---
+
+# X. Advanced JSON/YAML Output
+
+## YAML Output
+
+```bash
+kubectl get pod nginx -o yaml
+```
+
+## JSON Output
+
+```bash
+kubectl get pod nginx -o json
+```
+
+## Custom Columns
+
+```bash
+kubectl get pods \
+-o custom-columns=NAME:.metadata.name,STATUS:.status.phase
+```
+
+---
+
+# Y. Useful Shortcuts
+
+## All Resources
+
+```bash
+kubectl get all
+```
+
+## Watch Resources
+
+```bash
+kubectl get pods -w
+```
+
+## Explain Resource
+
+```bash
+kubectl explain deployment
+```
+
+## Explain Field
+
+```bash
+kubectl explain deployment.spec
+```
+
+---
+
+# Z. Must-Know Production Commands
+
+## Check Everything
+
+```bash
+kubectl get all -A
+```
+
+## Find Error Pods
+
+```bash
+kubectl get pods -A | grep Error
+```
+
+## Pods on Specific Node
+
+```bash
+kubectl get pods -o wide
+```
+
+## Pod Logs Across Namespaces
+
+```bash
+kubectl logs -n production nginx
+```
+
+## Force Delete Pod
+
+```bash
+kubectl delete pod nginx --grace-period=0 --force
+```
+
+## Check Certificate Expiry
+
+```bash
+kubeadm certs check-expiration
+```
+
+## ETCD Snapshot Backup
+
+```bash
+ETCDCTL_API=3 etcdctl snapshot save backup.db
+```
+
+---
+
+# Top 20 Commands Every DevOps Engineer Uses Daily
+
+```bash
+kubectl get pods -A
+kubectl get nodes
+kubectl get svc
+kubectl get deployments
+kubectl describe pod <pod>
+kubectl logs <pod>
+kubectl logs -f <pod>
+kubectl exec -it <pod> -- bash
+kubectl top pods
+kubectl top nodes
+kubectl apply -f file.yaml
+kubectl delete -f file.yaml
+kubectl rollout status deployment/<name>
+kubectl rollout undo deployment/<name>
+kubectl scale deployment <name> --replicas=3
+kubectl get events
+kubectl get all -A
+kubectl port-forward svc/<svc> 8080:80
+kubectl cordon <node>
+kubectl drain <node> --ignore-daemonsets
+```
+
+---
+
+# Summary
+
+This cheat sheet covers the most commonly used Kubernetes commands for:
+
+- CKA (Certified Kubernetes Administrator)
+- CKAD (Certified Kubernetes Application Developer)
+- CKS (Certified Kubernetes Security Specialist)
+- DevOps Engineers
+- Site Reliability Engineers (SRE)
+- Production Support Engineers
+- Platform Engineers
+- Cloud Engineers
+- Kubernetes Administrators
+
+⭐ Keep this README as a quick reference guide for daily Kubernetes operations and troubleshooting.
