@@ -689,3 +689,75 @@ git count-objects -v
 # GitHub-Specific Commands
 
 ## Create
+
+# GitHub-Specific Commands
+
+## Create Repository Using GitHub CLI
+
+```bash
+gh repo create myrepo
+```
+
+## Clone Repository
+
+```bash
+gh repo clone user/repo
+```
+
+## Create Pull Request
+
+```bash
+gh pr create
+```
+
+## View Pull Request
+
+```bash
+gh pr view
+```
+
+---
+
+# Top 30 Git Commands Used Daily
+
+```bash
+git clone <repo_url>
+git status
+git add .
+git commit -m "message"
+git push
+git pull
+git fetch
+git log --oneline
+git branch
+git checkout -b feature
+git switch feature
+git merge feature
+git rebase main
+git stash
+git stash pop
+git remote -v
+git diff
+git tag
+git reset --soft HEAD~1
+git reset --hard HEAD~1
+git restore .
+git cherry-pick <commit>
+git revert <commit>
+git blame file.txt
+git show
+git reflog
+git clean -fd
+git grep "text"
+git push --force-with-lease
+git gc
+```
+
+---
+
+# Git Troubleshooting Commands
+
+```bash
+git status
+git diff
+git 
