@@ -823,3 +823,635 @@ This project demonstrates:
 ✅ Production-Ready Containerization
 
 ⭐ Use this project as a starter template for REST APIs with Swagger UI, OpenAPI, Docker, Kubernetes, and DevOps pipelines.
+
+
+# Swagger UI Calculator Application
+## Spring Boot + OpenAPI + Docker (Build & Run Example)
+
+This project demonstrates a complete REST API CRUD-style Calculator application using:
+
+- Spring Boot 3
+- OpenAPI 3
+- Swagger UI
+- Docker Multi-Stage Build
+- Maven
+
+The application exposes the following APIs:
+
+```text
+GET     - Retrieve calculations
+POST    - Perform calculation
+PUT     - Update calculation
+DELETE  - Delete calculation
+```
+
+---
+
+# Project Structure
+
+```text
+calculator-api/
+
+├── Dockerfile
+├── pom.xml
+
+└── src
+    └── main
+        ├── java
+        │
+        │   └── com/example/calculator
+        │
+        │      ├── CalculatorApplication.java
+        │      ├── controller
+        │      │     └── CalculatorController.java
+        │      │
+        │      ├── model
+        │      │     └── Calculation.java
+        │      │
+        │      └── service
+        │            └── CalculatorService.java
+        │
+        └── resources
+             └── application.yml
+```
+
+---
+
+# Maven Dependency
+
+## pom.xml
+
+```xml
+<dependencies>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>
+            springdoc-openapi-starter-webmvc-ui
+        </artifactId>
+        <version>2.8.5</version>
+    </dependency>
+
+</dependencies>
+```
+
+---
+
+# Main Class
+
+## CalculatorApplication.java
+
+```java
+package com.example.calculator;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CalculatorApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(
+            CalculatorApplication.class,
+            args
+        );
+    }
+}
+```
+
+---
+
+# Request Model
+
+## Calculation.java
+
+```java
+package com.example.calculator.model;
+
+public class Calculation {
+
+    private int id;
+
+    private double num1;
+
+    private double num2;
+
+    private String operation;
+
+    private double result;
+
+    public Calculation() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public double getNum1() {
+        return num1;
+    }
+
+    public void setNum1(double num1) {
+        this.num1 = num1;
+    }
+
+    public double getNum2() {
+        return num2;
+    }
+
+    public void setNum2(double num2) {
+        this.num2 = num2;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
+
+    public double getResult() {
+        return result;
+    }
+
+    public void setResult(double result) {
+        this.result = result;
+    }
+}
+```
+
+---
+
+# Service Layer
+
+## CalculatorService.java
+
+```java
+package com.example.calculator.service;
+
+import com.example.calculator.model.Calculation;
+
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+@Service
+public class CalculatorService {
+
+    private final Map<Integer, Calculation> db*=
+            new HashMap<>();
+
+  * public List<Calculation> findAll(* {
+        return new ArrayList<>(*b.values());
+    }
+
+    public Cal*ulation findById(int id) {
+       *return db.get(id);
+    }
+
+    publ*c Calculation save(Calculation cal*ulation) {
+
+        double result *
+                performOperation(*                        calculatio*.getNum1(),
+                      * calculation.getNum2(),
+          *             calculation.getOperat*on());
+
+        calculation.setRes*lt(result);
+
+        db.put(calcul*tion.getId(),
+                calc*lation);
+
+        return calculati*n;
+    }
+
+    public void delete(i*t id) {
+        db.remove(id);
+   *}
+
+    private double performOpera*ion(
+            double a,
+       *    double b,
+            String o*eration) {
+
+        switch (operat*on.toLowerCase()) {
+
+            c*se "add":
+                return a*+ b;
+
+            case "subtract":*                return a - b;
+
+   *        case "multiply":
+         *      return a * b;
+
+            c*se "divide":
+                retur* a / b;
+
+            default:
+    *           throw new RuntimeExcept*on(
+                        "Inval*d Operation");
+        }
+    }
+}
+`*`
+
+---
+
+# REST Controller
+
+## Calc*latorController.java
+
+```java
+pack*ge com.example.calculator.controll*r;
+
+import com.example.calculator.*odel.Calculation;
+import com.examp*e.calculator.service.CalculatorSer*ice;
+
+import io.swagger.v3.oas.ann*tations.Operation;
+import io.swagg*r.v3.oas.annotations.tags.Tag;
+
+im*ort org.springframework.web.bind.a*notation.*;
+
+import java.util.List*
+
+@RestController
+@RequestMapping(*/api/calculator")
+@Tag(name = "Cal*ulator APIs")
+public class Calcula*orController {
+
+    private final *alculatorService service;
+
+    pub*ic CalculatorController(
+         *  CalculatorService service) {
+
+  *     this.service = service;
+    }*
+    @GetMapping
+    @Operation(su*mary =
+            "Get All Calcul*tions")
+    public List<Calculatio*> getAll() {
+
+        return servi*e.findAll();
+    }
+
+    @GetMappin*("/{id}")
+    @Operation(summary =*            "Get Calculation By Id*)
+    public Calculation getById(
+*           @PathVariable int id) {*
+        return service.findById(i*);
+    }
+
+    @PostMapping
+    @Op*ration(summary =
+            "Crea*e Calculation")
+    public Calcula*ion createCalculation(
+           *@RequestBody Calculation request) *
+
+        return service.save(requ*st);
+    }
+
+    @PutMapping("/{id}*)
+    @Operation(summary =
+       *    "Update Calculation")
+    publ*c Calculation updateCalculation(
+ *          @PathVariable int id,
+
+ *          @RequestBody Calculation*request) {
+
+        request.setId(*d);
+
+        return service.save(r*quest);
+    }
+
+    @DeleteMapping(*/{id}")
+    @Operation(summary =
+ *          "Delete Calculation")
+  * public String deleteCalculation(
+*           @PathVariable int id) {*
+        service.delete(id);
+
+    *   return "Calculation Deleted";
+ *  }
+}
+```
+
+---
+
+# Application Conf*guration
+
+## application.yml
+
+```y*ml
+server:
+  port: 8080
+
+springdoc*
+
+  swagger-ui:
+    enabled: true
+*  api-docs:
+    enabled: true
+```
+*---
+
+# API Documentation
+
+## GET A*l Calculations
+
+```http
+GET /api/c*lculator
+```
+
+Response:
+
+```json
+[
+  {
+    "id": 1,
+    "num1": 10,
+    "num2": 20,
+    "operation": "add",
+    "result": 30
+  }
+]
+```
+
+---*
+## GET By Id
+
+```http
+GET /api/ca*culator/1
+```
+
+Response:
+
+```json
+*
+  "id": 1,
+  "num1": 10,
+  "num2"* 20,
+  "operation": "add",
+  "resu*t": 30
+}
+```
+
+---
+
+## POST Create *alculation
+
+```http
+POST /api/calc*lator
+```
+
+Request:
+
+```json
+{
+  "*d": 1,
+  "num1": 10,
+  "num2": 20,*  "operation": "add"
+}
+```
+
+Respon*e:
+
+```json
+{
+  "id": 1,
+  "num1":*10,
+  "num2": 20,
+  "operation": "*dd",
+  "result": 30
+}
+```
+
+---
+
+##*PUT Update Calculation
+
+```http
+PU* /api/calculator/1
+```
+
+Request:
+
+*``json
+{
+  "num1": 100,
+  "num2": *0,
+  "operation": "subtract"
+}
+```*
+Response:
+
+```json
+{
+  "id": 1,
+ *"num1": 100,
+  "num2": 20,
+  "oper*tion": "subtract",
+  "result": 80
+*
+```
+
+---
+
+## DELETE Calculation
+
+*``http
+DELETE /api/calculator/1
+``*
+
+Response:
+
+```text
+Calculation D*leted
+```
+
+---
+
+# Build Project
+
+`*`bash
+mvn clean package
+```
+
+Gener*ted File:
+
+```text
+target/calculat*r-api.jar
+```
+
+---
+
+# Run Applicat*on
+
+```bash
+java -jar target/calcu*ator-api.jar
+```
+
+---
+
+# Swagger U*
+
+Open:
+
+```text
+http://localhost:*080/swagger-ui/index.html
+```
+
+---*
+# OpenAPI JSON
+
+```text
+http://lo*alhost:8080/v3/api-docs
+```
+
+---
+
+* Dockerfile
+
+## Multi-Stage Build
+*```dockerfile
+FROM maven:3.9.8-ecl*pse-temurin-17 AS builder
+
+WORKDIR*/app
+
+COPY . .
+
+RUN mvn clean pack*ge -DskipTests
+
+FROM eclipse-temur*n:17-jre
+
+WORKDIR /app
+
+COPY --fro*=builder \
+/app/target/calculator-*pi.jar \
+app.jar
+
+EXPOSE 8080
+
+ENT*YPOINT ["java","-jar","app.jar"]
+`*`
+
+---
+
+# Build Docker Image
+
+```b*sh
+docker build -t calculator-api:*1 .
+```
+
+---
+
+# Run Container
+
+```*ash
+docker run -d \
+--name calcula*or-api \
+-p 8080:8080 \
+calculator*api:v1
+```
+
+---
+
+# Verify Containe*
+
+```bash
+docker ps
+```
+
+---
+
+# Ch*ck Logs
+
+```bash
+docker logs calcu*ator-api
+```
+
+---
+
+# Test APIs Usi*g CURL
+
+## POST
+
+```bash
+curl -X P*ST \
+http://localhost:8080/api/cal*ulator \
+-H "Content-Type: applica*ion/json" \
+-d '{
+"id":1,
+"num1":1*,
+"num2":20,
+"operation":"add"
+}'
+*``
+
+---
+
+## GET
+
+```bash
+curl \
+ht*p://localhost:8080/api/calculator
+*``
+
+---
+
+## PUT
+
+```bash
+curl -X P*T \
+http://localhost:8080/api/calc*lator/1 \
+-H "Content-Type: applic*tion/json" \
+-d '{
+"num1":100,
+"nu*2":20,
+"operation":"subtract"
+}'
+`*`
+
+---
+
+## DELETE
+
+```bash
+curl -X*DELETE \
+http://localhost:8080/api*calculator/1
+```
+
+---
+
+# End-to-En* Workflow
+
+```text
+Developer
+     *
+     ▼
+Spring Boot Code
+     |
+  *  ▼
+Swagger/OpenAPI
+     |
+     ▼
+*aven Build
+     |
+     ▼
+Docker Im*ge
+     |
+     ▼
+Docker Container
+*    |
+     ▼
+Swagger UI
+     |
+   *
