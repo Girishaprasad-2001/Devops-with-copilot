@@ -760,4 +760,25 @@ git gc
 ```bash
 git status
 git diff
-git 
+git log --oneline --graph
+git fetch --all
+git remote -v
+git branch -a
+git reflog
+git fsck
+git stash list
+git merge --abort
+git rebase --abort
+git reset --hard HEAD
+```
+# Git Workflow (Most Common)
+``` bash
+git clone <repo>
+git checkout -b feature
+git add .
+git commit -m "Feature developed"
+git push -u origin feature
+git pull --rebase origin main
+git push
+```
+This cheat sheet covers the most important Git commands used for day-to-day development, DevOps, CI/CD, GitHub, GitLab, Azure DevOps, and production support environments.
