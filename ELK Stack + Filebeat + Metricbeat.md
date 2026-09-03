@@ -1273,3 +1273,920 @@ Monitoring (Prometheus/Grafana)
 ```bash
 kubectl get pods 
 ```
+# # ELK Stack Setup | Linux Server Configuration + Kubernetes Deployment YAML + DevOps Workflow
+
+A complete End-to-End ELK (Elasticsearch, Logstash, Kibana) implementation guide covering:
+
+- Linux Server Setup
+- Kubernetes Deployment
+- Filebeat Configuration
+- Metricbeat Configuration
+- Elasticsearch Cluster
+- Logstash Pipeline
+- Kibana Dashboards
+- Kubernetes YAML Deployments
+- DevOps Monitoring Workflow
+- Production Best Practices
+
+---
+
+# Architecture Overview
+
+## Enterprise ELK Architecture
+
+```text
+                    +--------------------+
+                    |    Applications     |
+                    | SpringBoot/NodeJS   |
+                    +----------+---------+
+                               |
+                               ▼
+
+                     +------------------+
+                     | Linux Logs        |
+                     | Container Logs    |
+                     +--------+---------+
+                              |
+               +--------------+----------------+
+               |                               |
+               ▼                               ▼
+
+       +---------------+              +---------------+
+       | Filebeat      |              | Metricbeat    |
+       | Log Collector |              | Metrics Agent |
+       +-------+-------+              +-------+-------+
+               |                              |
+               +--------------+---------------+
+                              |
+                              ▼
+
+                     +------------------+
+                     | Logstash         |
+                     | Parsing Engine   |
+                     +--------+---------+
+                              |
+                              ▼
+
+                     +------------------+
+                     | Elasticsearch    |
+                     | Data Storage     |
+                     +--------+---------+
+                              |
+                              ▼
+
+                     +------------------+
+                     | Kibana           |
+                     | Visualization    |
+                     +------------------+
+```
+
+---
+
+# ELK Components
+
+## Elasticsearch
+
+Stores:
+
+- Application Logs
+- Container Logs
+- Metrics
+- Events
+- Audit Records
+
+Port:
+
+```text
+9200
+```
+
+---
+
+## Logstash
+
+Processes:
+
+- Log Parsing
+- Data Enrichment
+- Filtering
+- Data Routing
+
+Port:
+
+```text
+5044
+```
+
+---
+
+## Kibana
+
+Provides:
+
+- Dashboard
+- Visualization
+- Search
+- Alerting
+
+Port:
+
+```text
+5601
+```
+
+---
+
+## Filebeat
+
+Collects:
+
+```text
+Application Logs
+System Logs
+Container Logs
+```
+
+---
+
+## Metricbeat
+
+Collects:
+
+```text
+CPU Metrics
+Memory Metrics
+Filesystem Metrics
+Network Metrics
+Kubernetes Metrics
+```
+
+---
+
+# Linux Server Installation
+
+## Step 1: Install Java
+
+```bash
+sudo dnf install java-17-openjdk -y
+```
+
+Verify:
+
+```bash
+java -version
+```
+
+---
+
+# Step 2: Install Elasticsearch
+
+## Download
+
+```bash
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+```
+
+```bash
+cat <<EOF > /etc/yum.repos.d/elasticsearch.repo
+[elasticsearch]
+name=Elasticsearch repository
+baseurl=https://artifacts.elastic.co/packages/8.x/yum
+gpgcheck=1
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF
+```
+
+---
+
+## Install
+
+```bash
+yum install elasticsearch -y
+```
+
+---
+
+## Configure
+
+```bash
+vi /etc/elasticsearch/elasticsearch.yml
+```
+
+```yaml
+cluster.name: elk-prod
+
+node.name: node-1
+
+network.host: 0.0.0.0
+
+http.port: 9200
+
+discovery.type: single-node
+```
+
+---
+
+## Start Service
+
+```bash
+systemctl daemon-reload
+
+systemctl enable elasticsearch
+
+systemctl start elasticsearch
+```
+
+Verify:
+
+```bash
+curl localhost:9200
+```
+
+---
+
+# Step 3: Install Kibana
+
+```bash
+yum install kibana -y
+```
+
+---
+
+## Configure
+
+```bash
+vi /etc/kibana/kibana.yml
+```
+
+```yaml
+server.port: 5601
+
+server.host: "0.0.0.0"
+
+elasticsearch.hosts:
+  - "http://localhost:9200"
+```
+
+---
+
+## Start
+
+```bash
+systemctl enable kibana
+
+systemctl start kibana
+```
+
+Verify:
+
+```text
+http://SERVER-IP:5601
+```
+
+---
+
+# Step 4: Install Logstash
+
+```bash
+yum install logstash -y
+```
+
+---
+
+## Configure Pipeline
+
+```bash
+vi /etc/logstash/conf.d/filebeat.conf
+```
+
+```ruby
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+
+}
+
+output {
+
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    index => "filebeat-%{+YYYY.MM.dd}"
+  }
+
+}
+```
+
+---
+
+## Start Service
+
+```bash
+systemctl enable logstash
+
+systemctl start logstash
+```
+
+Verify:
+
+```bash
+ss -tulnp | grep 5044
+```
+
+---
+
+# Linux Filebeat Configuration
+
+Install:
+
+```bash
+yum install filebeat -y
+```
+
+---
+
+## Configure
+
+```bash
+vi /etc/filebeat/filebeat.yml
+```
+
+```yaml
+filebeat.inputs:
+
+- type: log
+
+  enabled: true
+
+  paths:
+
+    - /var/log/*.log
+
+output.logstash:
+
+  hosts:
+ *  - "10.0.0.100:5044"
+``*
+
+---
+
+*# Start
+
+```bash*systemctl enable filebeat
+
+systemc*l start filebeat
+```
+
+*--
+
+# Linux Metricbeat Configurati*n
+
+Install:
+
+```bash
+yum install m*tricbeat -y
+```
+
+---
+
+## Configure*
+```yaml
+metricbeat.modules:
+
+- mo*ule: system
+
+  metricsets:
+    - c*u
+    - memory
+    - filesystem
+  * - process
+
+output.elasticsearch:
+*  hosts:
+    -*"http://10.0.0.100:9200"
+```
+
+---
+*## Enable
+
+```bash*metricbeat modules enable system
+`*`
+
+---
+
+## Start
+
+```bash*systemctl enable metricbeat
+
+syste*ctl start metricbeat
+```
+
+*--
+
+# Linux*Monitoring Workflow
+
+```text
+Linux*Server
+      |
+      +------------*---+
+      |                |
+    * ▼                ▼
+
+ Filebeat    * *Metricbeat
+
+      |               *|
+
+      ▼                ▼
+
+     *   Elasticsearch
+
+                *
+
+                ▼
+
+             *ibana
+```
+
+---
+
+# Kubernetes Deplo*ment
+
+---
+
+# Elasticsearch Deploym*nt YAML
+
+```yaml
+apiVersion: apps/*1
+kind: Deployment
+metadata:
+  nam*: elasticsearch
+spec:
+  replicas: *
+  selector:
+    matchLabels:
+    * app: elasticsearch
+  template:
+  * metadata:
+      labels:
+        a*p: elasticsearch
+    spec:
+      c*ntainers:
+      - name: elasticsea*ch
+        image: docker.elastic.c*/elasticsearch/elasticsearch:8.15.*
+        env:
+        - name: disc*very.type
+          value: single-*ode
+        ports:
+        - conta*nerPort: 9200
+```
+
+---
+
+# Elastics*arch Service
+
+```yaml
+apiVersion: *1
+kind: Service
+metadata:
+  name: *lasticsearch
+spec:
+  selector:
+   *app: elasticsearch
+
+  ports:
+  - p*rt: 9200
+    targetPort: 9200
+```
+*Apply:
+
+```bash
+kubectl apply -f e*asticsearch.yaml
+```
+
+---
+
+# Kiban* Deployment YAML
+
+```yaml
+apiVersi*n: apps/v1
+kind: Deployment
+metada*a:
+  name: kibana
+spec:
+  replicas* 1
+
+  selector:
+    matchLabels:
+ *    app: kibana
+
+  template:
+    m*tadata:
+      labels:
+        app:*kibana
+
+    spec:
+      containers*
+
+      - name: kibana
+
+        im*ge: docker.elastic.co/kibana/kiban*:8.15.0
+
+        ports:
+        - *ontainerPort: 5601
+```
+
+---
+
+# Kib*na Service
+
+```yaml
+apiVersion: v1*
+kind: Service
+
+metadata:
+  name: *ibana
+
+spec:
+
+  selector:
+    app:*kibana
+
+  ports:
+  - port: 5601
+  * targetPort: 5601
+
+  type: NodePor*
+```
+
+---
+
+# Filebeat DaemonSet
+
+`*`yaml
+apiVersion: apps/v1
+kind: Da*monSet
+metadata:
+  name: filebeat
+*spec:
+
+  selector:
+    matchLabels*
+      app: filebeat
+
+  template:
+*   metadata:
+      labels:
+       *app: filebeat
+
+    spec:
+      con*ainers:
+
+      - name: filebeat
+
+ *      image: docker.elastic.co/bea*s/filebeat:8.15.0
+```
+
+Deploy:
+
+``*bash
+kubectl apply -f filebeat.yam*
+```
+
+---
+
+# Metricbeat DaemonSet
+*```yaml
+apiVersion: apps/v1
+kind: *aemonSet
+metadata:
+  name: metricb*at
+
+spec:
+
+  selector:
+    matchLa*els:
+      app: metricbeat
+
+  temp*ate:
+
+    metadata:
+      labels:
+*       app: metricbeat
+
+    spec:
+*      containers:
+
+      - name: m*tricbeat
+
+        image: docker.el*stic.co/beats/metricbeat:8.15.0
+``*
+
+Apply:
+
+```bash
+kubectl apply -f*metricbeat.yaml
+```
+
+---
+
+# Kubern*tes Monitoring Workflow
+
+```text
+P*ds
+ |
+ ▼
+Container Logs
+ |
+ ▼
+File*eat DaemonSet
+ |
+ ▼
+Logstash
+ |
+ ▼*Elasticsearch
+ |
+ ▼
+Kibana
+
+
+
+Node*
+Pods
+Containers
+ |
+ ▼
+Metricbeat *aemonSet
+ |
+ ▼
+Elasticsearch
+ |
+ ▼*Kibana
+```
+
+---
+
+# DevOps CI/CD Wo*kflow
+
+```text
+Developer Commit
+  *    |
+       ▼
+
+GitHub / GitLab
+
+ *     |
+       ▼
+
+Jenkins Pipeline
+*       |
+       ▼
+
+Docker Build
+
+ *     |
+       ▼
+
+Docker Push
+
+    *  |
+       ▼
+
+Kubernetes Deploy
+
+ *     |
+       ▼
+
+Application Pods
+*       |
+       ▼
+
+Logs Generated
+*       |
+       ▼
+
+Filebeat
+
+     * |
+       ▼
+
+Logstash
+
+       |
+  *    ▼
+
+Elasticsearch
+
+       |
+   *   ▼
+
+Kibana Dashboard
+```
+
+---
+
+#*Kibana Index Patterns
+
+Create:
+
+``*text
+filebeat-*
+```
+
+and
+
+```text
+*etricbeat-*
+```
+
+From:
+
+```text
+St*ck Management
+   |
+   ▼
+Index Patt*rns
+```
+
+---
+
+# Useful Elasticsear*h Commands
+
+## Cluster Health
+
+```*ash
+curl localhost:9200/_cluster/h*alth?pretty
+```
+
+## Nodes
+
+```bash*curl localhost:9200/_cat/nodes?v
+`*`
+
+## Indices
+
+```bash
+curl localh*st:9200/_cat/indices?v
+```
+
+---
+
+#*Validation Commands
+
+## Elasticsea*ch
+
+```bash
+systemctl status elast*csearch
+```
+
+```bash
+curl localhos*:9200
+```
+
+---
+
+## Kibana
+
+```bash*systemctl status kibana
+```
+
+---
+
+*# Logstash
+
+```bash
+systemctl stat*s logstash
+```
+
+---
+
+## Filebeat
+
+*``bash
+systemctl status filebeat
+`*`
+
+---
+
+## Metricbeat
+
+```bash
+sys*emctl status metricbeat
+```
+
+---
+
+* Troubleshooting
+
+```bash
+journalc*l -u elasticsearch -f
+
+journalctl *u kibana -f
+
+journalctl -u logstas* -f
+
+journalctl -u filebeat -f
+
+jo*rnalctl -u metricbeat -f
+```
+
+---
+*## Port Checks
+
+```bash
+ss -tulnp * grep 9200
+
+ss -tulnp | grep 5601
+*ss -tulnp | grep 5044
+```
+
+---
+
+# *nd-to-End ELK Monitoring Flow
+
+```*ext
+Linux Server / Kubernetes Clus*er
+               |
+              *|
+      +--------+--------+
+      *                 |
+      ▼        *        ▼
+
+  Filebeat       Metric*eat
+
+      |                 |
+
+  *   ▼                 ▼
+
+          *ogstash
+
+              |
+
+        *     ▼
+
+        Elasticsearch
+
+   *          |
+
+              ▼
+
+    *       Kibana
+
+              |
+
+  *           ▼
+
+ Dashboards • Search*• Analytics • Alerts
+```
+
+---
+
+# S*mmary
+
+### Filebeat
+
+```text
+Colle*ts Logs
+```
+
+### Metricbeat
+
+```te*t
+Collects System Metrics
+```
+
+###*Logstash
+
+```text
+*arses and Transforms Data*```
+
+### Elasticsearch
+
+```text*Indexes and Stores Data
+```
+
+### K*bana
+
+```text
+Visualizes Logs and *etrics
+```
+
+### Enterprise DevOps *low
+
+```text
+Linux/Kubernetes
+    *   ↓
+Filebeat + Metricbeat
+       *↓
+Logstash
+        ↓
+Elasticsearch*        ↓
+Kibana*        ↓
+Monitoring +*Analytics + Alerts
+```
+
+* This README provides a complete E*K Stack deployment architecture fo* Linux servers, Kubernetes cluster*, and enterprise DevOps monitoring environments.
