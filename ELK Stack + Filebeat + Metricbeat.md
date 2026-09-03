@@ -881,3 +881,395 @@ Dashboards, Search, Alerts
 ```
 
 ⭐ This ELK + Beats setup is one of the most commonly used observability platforms for enterprise Linux servers, Kubernetes clusters, cloud infrastructure, DevOps monitoring, and production support.
+
+
+# Linux Server Configuration + Kubernetes Deployment YAML + DevOps Workflow, use the following format:
+
+# Linux Server Configuration and Kubernetes Deployment Guide
+
+A practical guide for configuring Linux servers, deploying applications on Kubernetes, and managing production workloads.
+
+---
+
+# Prerequisites
+
+- Linux Server (Ubuntu/RHEL/CentOS/Amazon Linux)
+- Docker Installed
+- Kubernetes Cluster
+- kubectl Configured
+- Git Installed
+- Internet Connectivity
+
+---
+
+# 1. Linux Server Configuration
+
+## Update Server Packages
+
+### Ubuntu/Debian
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### RHEL/CentOS
+
+```bash
+sudo yum update -y
+```
+
+---
+
+## Install Git
+
+### Ubuntu
+
+```bash
+sudo apt install git -y
+```
+
+### RHEL/CentOS
+
+```bash
+sudo yum install git -y
+```
+
+Verify installation:
+
+```bash
+git --version
+```
+
+---
+
+## Install Docker
+
+### Ubuntu
+
+```bash
+sudo apt update
+sudo apt install docker.io -y
+
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+Verify:
+
+```bash
+docker --version
+docker info
+```
+
+Add current user to docker group:
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+---
+
+## Install Kubectl
+
+```bash
+curl -LO https://dl.k8s.io/release/stable/bin/linux/amd64/kubectl
+
+chmod +x kubectl
+
+sudo mv kubectl /usr/local/bin/
+```
+
+Verify:
+
+```bash
+kubectl version --client
+```
+
+---
+
+# 2. Kubernetes Cluster Verification
+
+Check cluster status:
+
+```bash
+kubectl cluster-info
+```
+
+Check nodes:
+
+```bash
+kubectl get nodes
+```
+
+Expected Output:
+
+```text
+NAME       STATUS   ROLES
+master01   Ready    control-plane
+worker01   Ready    worker
+worker02   Ready    worker
+```
+
+---
+
+# 3. Create Namespace
+
+```bash
+kubectl create namespace dev
+```
+
+Verify:
+
+```bash
+kubectl get ns
+```
+
+---
+
+# 4. Kubernetes Deployment YAML
+
+Create file:
+
+```bash
+vi deployment.yaml
+```
+
+## deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-deployment
+  namespace: dev
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: nginx
+
+  template:
+    metadata:
+      labels:
+        app: nginx
+
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+
+        ports:
+        - containerPort: 80
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+```
+
+---
+
+# 5. Create Service YAML
+
+## service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: nginx-service
+  namespace: dev
+
+spec:
+  selector:
+    app: nginx
+
+  ports:
+  - port: 80
+    targetPort: 80
+
+  type: NodePort
+```
+
+---
+
+# 6. Deploy Application
+
+Apply deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+Apply service:
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Verify resources:
+
+```bash
+kubectl get all -n dev
+```
+
+---
+
+# 7. Scaling Deployment
+
+Scale to 5 replicas:
+
+```bash
+kubectl scale deployment nginx-deployment \
+--replicas=5 \
+-n dev
+```
+
+Verify:
+
+```bash
+kubectl get pods -n dev
+```
+
+---
+
+# 8. Rolling Update
+
+Update Image:
+
+```bash
+kubectl set image deployment/nginx-deployment \
+nginx=nginx:1.27 \
+-n dev
+```
+
+Check rollout:
+
+```bash
+kubectl rollout status deployment/nginx-deployment \
+-n dev
+```
+
+---
+
+# 9. Rollback Deployment
+
+View history:
+
+```bash
+kubectl rollout history deployment/nginx-deployment
+```
+
+Rollback:
+
+```bash
+kubectl rollout undo deployment/nginx-deployment \
+-n dev
+```
+
+---
+
+# 10. Pod Troubleshooting
+
+View pods:
+
+```bash
+kubectl get pods -n dev
+```
+
+Describe pod:
+
+```bash
+kubectl describe pod <pod-name> -n dev
+```
+
+View logs:
+
+```bash
+kubectl logs <pod-name> -n dev
+```
+
+Open shell:
+
+```bash
+kubectl exec -it <pod-name> -n dev -- bash
+```
+
+---
+
+# 11. Resource Monitoring
+
+Node utilization:
+
+```bash
+kubectl top nodes
+```
+
+Pod utilization:
+
+```bash
+kubectl top pods -n dev
+```
+
+---
+
+# 12. Delete Resources
+
+Delete deployment:
+
+```bash
+kubectl delete deployment nginx-deployment -n dev
+```
+
+Delete service:
+
+```bash
+kubectl delete service nginx-service -n dev
+```
+
+Delete namespace:
+
+```bash
+kubectl delete namespace dev
+```
+
+---
+
+# Production DevOps Workflow
+
+```text
+Developer
+    ↓
+Git Push
+    ↓
+GitHub/GitLab
+    ↓
+Jenkins / Azure DevOps
+    ↓
+Docker Build
+    ↓
+Docker Push
+    ↓
+Kubernetes Deployment
+    ↓
+Service Exposure
+    ↓
+Monitoring (Prometheus/Grafana)
+```
+
+---
+
+# Common Kubernetes Commands
+
+```bash
+kubectl get pods 
+```
